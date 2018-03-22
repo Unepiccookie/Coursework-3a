@@ -3,7 +3,7 @@
 
 using namespace std;
 
-enum state {Out_Of_Chocolate, No_Credit, Has_Credit, Dispenses_Chocolate, Maintenance_Mode};
+enum state { Out_Of_Chocolate, No_Credit, Has_Credit, Dispenses_Chocolate, Maintenance_Mode };
 
 class StateContext;
 
@@ -60,13 +60,13 @@ public:
 class ChocoState : public State, public Transition
 {
 public:
-	ChocoState(StateContext* Context) : State(Context){}
+	ChocoState(StateContext* Context) : State(Context) {}
 };
 
 class OutOfChocolate : public ChocoState
 {
 public:
-	OutOfChocolate(StateContext* Context) : ChocoState(Context){}
+	OutOfChocolate(StateContext* Context) : ChocoState(Context) {}
 	bool enterPin(int pin);
 	bool moneyRejected(void);
 };
@@ -82,7 +82,7 @@ public:
 class HasCredit : public ChocoState
 {
 public:
-	HasCredit(StateContext* Context) : ChocoState(Context){}
+	HasCredit(StateContext* Context) : ChocoState(Context) {}
 	bool insertMoney(int credit);
 	bool makeSelection(int option);
 	bool moneyRejected(void);
@@ -170,7 +170,7 @@ bool MaintenanceMode::addChocolate(int number)
 {
 	((Chocolate_Dispenser*)CurrentContext)->inventory += number;
 	cout << "Adding chocolate. Current inventory is: " << ((Chocolate_Dispenser*)CurrentContext)->inventory << endl;
-	return true; 
+	return true;
 }
 bool MaintenanceMode::exit(void)
 {
@@ -179,7 +179,7 @@ bool MaintenanceMode::exit(void)
 		CurrentContext->setState(Out_Of_Chocolate);
 		return true;
 	}
-	if (((Chocolate_Dispenser*)CurrentContext)->inventory > 0 && ((Chocolate_Dispenser*)CurrentContext)->credit==0)
+	if (((Chocolate_Dispenser*)CurrentContext)->inventory > 0 && ((Chocolate_Dispenser*)CurrentContext)->credit == 0)
 	{
 		CurrentContext->setState(No_Credit);
 		return true;
@@ -215,5 +215,61 @@ bool DispensesChocolate::dispense(void)
 
 bool HasCredit::insertMoney(int credit)
 {
+	((Chocolate_Dispenser*)CurrentContext)->credit += credit;
+	cout << "You now have " << ((Chocolate_Dispenser*)CurrentContext)->credit << " credits." << endl;
+}
+bool HasCredit::makeSelection(int option)
+{
+	((Chocolate_Dispenser*)CurrentContext)->setState(Dispenses_Chocolate);
+}
+bool HasCredit::moneyRejected(void)
+{
+	cout << "Money has been rejected" << endl;
+}
 
+bool NoCredit::insertMoney(int credit)
+{
+	((Chocolate_Dispenser*)CurrentContext)->credit += credit;
+	cout << "You now have " << ((Chocolate_Dispenser*)CurrentContext)->credit << " credits." << endl;
+	((Chocolate_Dispenser*)CurrentContext)->setState(Has_Credit);
+}
+bool NoCredit::enterPin(int pin)
+{
+	if (pin == ((Chocolate_Dispenser*)CurrentContext)->pin)
+	{
+		cout << "Pin accepted" << endl;
+		((Chocolate_Dispenser*)CurrentContext)->setState(Maintenance_Mode);
+		return true;
+	}
+	else
+	{
+		cout << "Invaild pin" << endl;
+	}
+}
+
+bool OutOfChocolate::moneyRejected(void)
+{
+	cout << "This machine is currently out of stock. Money will be returned" << endl;
+}
+bool OutOfChocolate::enterPin(int pin)
+{
+	if (pin == ((Chocolate_Dispenser*)CurrentContext)->pin)
+	{
+		cout << "Pin accepted" << endl;
+		((Chocolate_Dispenser*)CurrentContext)->setState(Maintenance_Mode);
+		return true;
+	}
+	else
+	{
+		cout << "Invalid pin" << endl;
+	}
+}
+
+int main(void)
+{
+
+	while (true)
+	{
+
+	}
 }
